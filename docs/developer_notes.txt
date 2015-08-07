@@ -1,0 +1,42 @@
+
+DEVELOPER NOTES
+---------------
+1)
+
+lower case variable name = unexported = identifier CANNOT be DIRECTLY accessed from any other package in code base
+upper case variable name = exported = identifier CAN be DIRECTLY accessed from any other package in code base 
+directly exported means I can do packagename.ExportedVariable
+indirectly means you can make getter/setter methods for that variable... stupid articles :(
+
+
+2)
+
+rune = code point = (U+00E0) = item represented by a single value
+code point is the unix term used to refere to an item that can 
+be represented by a single value
+the 00E0 is in hex.
+another example: U+2318 is the code point for ⌘
+HOWEVER, the issue is that you can end up building a specific character
+by combining code points. For example, à (U+00E0) can be attained
+by combining combining an accent (U+0300) and a lower case a (U+0061).
+THUS, golang wanted to standardize this. 
+A rune is an alias for int32. 
+A rune represents a single character. 
+Unlike with unix code points, a specific rune represents only 1 specific
+character
+
+'⌘' is a rune with integer value 0x2318
+
+
+3)
+
+function execution order in packages.
+
+First, all the global variables are initialized. If we need to call a 
+function to initialize them, then the function will be called.
+
+Second, the init() method will be run. If there are multiple init()
+methods, then they will be run sequentially in the order they appear
+in the code. This is used in the golang packages to initalize tables.
+
+Finally, main is run, if it exists.
