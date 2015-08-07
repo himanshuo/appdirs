@@ -30,6 +30,7 @@ func init(){
 
 }
 
+//todo: can make this more versatile
 func badAppName(appname string) bool{
 	if system == "linux"{
 		for _, item := range badLinuxAppNames {
@@ -44,6 +45,9 @@ func badAppName(appname string) bool{
 
 
 func UserDataDir(appname string, appauthor string, version string, roaming bool) (string, error){
+	if badAppName(appname){
+		return "", errors.New("Invalid Application Name")
+	}
 	
 	home, err := homeDir(); 
 	if err !=nil {
@@ -51,15 +55,15 @@ func UserDataDir(appname string, appauthor string, version string, roaming bool)
 	}
 	
 	data_dir := filepath.Join(home, ".local", "share")
+	
 	//add appname to app_data_dir
-	if appname != ""{
-		data_dir = filepath.Join(data_dir, appname)
-	}
+	data_dir = filepath.Join(data_dir, appname)
+	
 	
 	//add version to app_data_dir	
-	if appname != "" && version != "0" {
+	if version != "0" {
 		data_dir = filepath.Join(data_dir, version ) 
-	}
+	} 
 	
 	return data_dir, nil
 }

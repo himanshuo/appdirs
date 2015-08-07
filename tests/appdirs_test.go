@@ -152,7 +152,7 @@ func TestUserDataDir(t *testing.T) {
 				t.Errorf("#%d: result was not ok. Expected ok.", i)
 			// !ok, ret exist, err not exist
 			} else if !test.ok && ret != "" && err == nil {
-				t.Errorf("#%d: result was ok. Expected error. Input was: {%v, %v, %v, %v}. Result was:", i, test.name, test.author, test.version, test.multipath, ret)
+				t.Errorf("#%d: result was ok. Expected error. Input was: {%v, %v, %v, %v}. Result was:", i, test.name, test.author, test.version, test.roaming, ret)
 			// !ok, ret not exist, err exist
 			} else if !test.ok && ret == "" && err != nil{
 				//expected error, got it. all good.
