@@ -1,8 +1,6 @@
-==
-==
 Appdirs
 ==
-==
+
 
 
 Help! I have a cross-platform application and 
