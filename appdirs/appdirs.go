@@ -1,7 +1,7 @@
 package appdirs
 import (
 	//"log"
-	//"runtime"
+	"runtime"
 	//"path"
 	"os"
 	//"os/user"
@@ -15,24 +15,54 @@ import (
 
 
 
+type SystemType int
 
-//todo: iota
+const (
+    LINUX SystemType = iota  // 0
+    WINDOWS             	 // 1
+    MAC         		     // 2
+)
 
-var system  string
+var system  SystemType
 var pathListSeperatorString string
 var badLinuxAppNames []string
 
 
 func init(){
-	system = "linux"
+	system = determineSystem()
 	pathListSeperatorString = fmt.Sprintf("%c", os.PathListSeparator)
 	badLinuxAppNames = []string{".", "","..", "/", "/", "./", "/.", "//"}
 
 }
 
+
+func determineSystem() SystemType {
+	
+	/* GOOS values
+	 * darwin
+	 * dragonfly
+	 * freebsd
+	 * linux
+	 * netbsd
+	 * openbsd
+	 * plan9
+	 * solaris
+	 * windows
+	 */
+	if runtime.GOOS == "windows"{
+		return WINDOWS
+	} else if runtime.GOOS == "darwin" {
+		return MAC
+	} else {
+		return LINUX
+	}
+	 
+}
+
+
 //todo: can make this more versatile
 func badAppName(appname string) bool{
-	if system == "linux"{
+	if system == LINUX{
 		for _, item := range badLinuxAppNames {
 			if item == appname {
 				return true
@@ -61,7 +91,7 @@ func UserDataDir(appname string, appauthor string, version string, roaming bool)
 	
 	
 	//add version to app_data_dir	
-	if version != "0" {
+	if version != "" {
 		data_dir = filepath.Join(data_dir, version ) 
 	} 
 	
@@ -85,7 +115,7 @@ func SiteDataDir(appname string, appauthor string, version string, multipath boo
 	resultPaths := make([]string, 0)
 	
 	if !badAppName(appname){
-		if version != "0" {
+		if version != "" {
 			
 			appname = filepath.Join(appname, version)
 			
@@ -133,10 +163,42 @@ func UserConfigDir(appname string, appauthor string, version string, roaming boo
 	if appname != "" {
 		path = filepath.Join(path, appname)
 	}
-	if appname != "" && version != "0"{
+	if appname != "" && version != ""{
 		path = filepath.Join(path, version)
 	}
 	return path, nil
+}
+
+
+func SiteConfigDir(appname string, appauthor string, version string, multipath bool) (string, error){
+	baseDirs := os.Getenv("XDG_CONFIG_DIRS")
+	if baseDirs == "" {
+		baseDirs =  "/etc/xdg"
+		
+	}
+	
+	paths := filepath.SplitList(baseDirs)
+	paths = apply(paths, expandTilde)
+	
+	resultPaths := make([]string, 0)
+	
+	if !badAppName(appname){
+		if version != "" {	
+			appname = filepath.Join(appname, version)
+		}
+		for _, path := range paths {	
+			resultPaths = append(resultPaths, filepath.Join(path,appname))
+		}
+	} else {
+		return "", errors.New("invalid appname")
+	}
+	
+	if multipath {
+		return strings.Join(resultPaths, pathListSeperatorString), nil
+	} else {
+		return resultPaths[0], nil
+	}
+	
 }
 
 
