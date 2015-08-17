@@ -160,13 +160,15 @@ func UserConfigDir(appname string, appauthor string, version string, roaming boo
 	}
 	
 	path := baseDir
-	if appname != "" {
-		path = filepath.Join(path, appname)
+	
+	if !badAppName(appname){
+		if version != "" {	
+			appname = filepath.Join(appname, version)
+		}
+		return filepath.Join(path,appname), nil
+	} else {
+		return "", errors.New("invalid appname")
 	}
-	if appname != "" && version != ""{
-		path = filepath.Join(path, version)
-	}
-	return path, nil
 }
 
 
@@ -201,6 +203,23 @@ func SiteConfigDir(appname string, appauthor string, version string, multipath b
 	
 }
 
-
+func UserCacheDir(appname string, appauthor string, version string, opinion bool) (string, error){
+	baseDir := os.Getenv("XDG_CACHE_HOME")
+	if baseDir == "" {
+		err := errors.New("")
+		if baseDir, err =  expandTilde("~/.cache"); err != nil {
+			return "", err
+		}
+		
+	}
+	if !badAppName(appname){
+		if version != "" {	
+			appname = filepath.Join(appname, version)
+		}
+		return filepath.Join(baseDir, appname), nil
+	} else {
+		return "", errors.New("invalid appname")
+	}
+}
 
 
